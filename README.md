@@ -6,13 +6,13 @@
   3. Save your changes by committing them.
 -->
 
-# [OSU Leaf Spot Detector]
+# OSU Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Introduction
 
-Welcome to **[OSU Leaf Spot Detector]**! This project is designed to [briefly describe your project's purpose or problem it solves].  
+Welcome to **OSU Leaf Spot Detector**! This project is designed to [briefly describe your project's purpose or problem it solves].  
 You can directly edit this section to update the project description as your work evolves.
 
 ## Key Features
@@ -39,7 +39,7 @@ conda install pip
 git clone https://github.com/[username]/[project-name].git
 
 # Navigate to the project directory
-cd [project-name]
+cd leafspot
 
 # Install dependencies
 pip install -r requirements.txt
