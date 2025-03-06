@@ -9,11 +9,10 @@
 # [OSU Leaf Spot Detector]
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://travis-ci.com/[username]/[project-name].svg?branch=master)](https://travis-ci.com/[username]/[project-name])
 
 ## Introduction
 
-Welcome to **[Project Title]**! This project is designed to [briefly describe your project's purpose or problem it solves].  
+Welcome to **[OSU Leaf Spot Detector]**! This project is designed to [briefly describe your project's purpose or problem it solves].  
 You can directly edit this section to update the project description as your work evolves.
 
 ## Key Features
@@ -24,7 +23,7 @@ You can directly edit this section to update the project description as your wor
 
 ## Installation
 
-Follow these steps to install the project:
+Open the terminal, and follow these steps to install the project:
 
 ```bash
 # Clone the repository
@@ -34,4 +33,4 @@ git clone https://github.com/[username]/[project-name].git
 cd [project-name]
 
 # Install dependencies (example: using npm)
-npm install
+pip install -r requirements.txt
