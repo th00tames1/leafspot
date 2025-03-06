@@ -23,42 +23,24 @@ You can directly edit this section to update the project description as your wor
 
 ## Installation
 
+If using Anaconda 3, create a clean environment and activate it. 
+In Anaconda Prompt, type the following these steps to install the project:
 ```bash
-cd PATH_TO_FSCT-MAIN_DIRECTORY
+# Create Conda Environment
 conda create -n YOUR_ENVIRONMENT_NAME python==3.9
+
+# Activate Conda Environment
 conda activate YOUR_ENVIRONMENT_NAME
+
+# Install the PyPI
 conda install pip
-pip install -r requirements.txt
-```
 
-Open the terminal, and follow these steps to install the project:
-
-```bash
 # Clone the repository
 git clone https://github.com/[username]/[project-name].git
-```
-```bash
-# Clone the repository
-cd PATH_TO_FSCT-MAIN_DIRECTORY
-```
-#If using Anaconda 3, create a clean environment and activate it. 
-In Anaconda Prompt, type the following (replacing the path to FSCT and your desired environment name as needed):
-```bash
-conda create -n YOUR_ENVIRONMENT_NAME python==3.9
 
-conda activate YOUR_ENVIRONMENT_NAME
-
-conda install pip
-
-pip install -r requirements.txt
-```
-
-```bash
 # Navigate to the project directory
 cd [project-name]
-```
 
-```bash
-# Install dependencies (example: using npm)
+# Install dependencies
 pip install -r requirements.txt
 ```
