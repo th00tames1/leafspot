@@ -12,7 +12,7 @@
 
 ## Introduction
 
-Welcome to **OSU Leaf Spot Detector**! This project is designed to [briefly describe your project's purpose or problem it solves].  
+Welcome to **OSU Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.  
 You can directly edit this section to update the project description as your work evolves.
 
 ## Key Features
@@ -43,4 +43,11 @@ cd leafspot
 
 # Install dependencies
 pip install -r requirements.txt
+```
+
+## How To Use
+
+
+```bash
+python run.py
 ```
