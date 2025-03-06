@@ -36,7 +36,7 @@ conda activate YOUR_ENVIRONMENT_NAME
 conda install pip
 
 # Clone the repository
-git clone https://github.com/[username]/[project-name].git
+git clone https://github.com/th00tames1/leafspot.git
 
 # Navigate to the project directory
 cd leafspot
