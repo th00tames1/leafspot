@@ -9,15 +9,17 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QListWidget,
     QListWidgetItem, QPushButton, QFileDialog, QVBoxLayout,
     QHBoxLayout, QGridLayout, QProgressBar, QMessageBox, QDialog,
-    QLineEdit, QDialogButtonBox, QAbstractItemView, QMenu, QCheckBox
+    QLineEdit, QDialogButtonBox, QAbstractItemView, QMenu, QCheckBox,
+    QTabWidget, QGroupBox
 )
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtCore import Qt, QSize, QSettings
 
 from ultralytics import YOLO
 
 class ListItemWidget(QWidget):
     def __init__(self, filename, parent=None):
+        """Initialize a list widget item showing a filename."""
         super().__init__(parent)
         layout = QHBoxLayout(self)
         layout.setContentsMargins(5, 0, 5, 0)
@@ -28,17 +30,21 @@ class ListItemWidget(QWidget):
         layout.addWidget(self.check_label)
     
     def show_check(self):
+        """Display a green check icon on the widget."""
         pixmap = qta.icon('fa.check', color='green').pixmap(16, 16)
         self.check_label.setPixmap(pixmap)
 
 class CustomListWidget(QListWidget):
     def keyPressEvent(self, event):
+        """Handle key press events; delete selected items on Delete key."""
         if event.key() == Qt.Key_Delete:
             for item in self.selectedItems():
                 self.takeItem(self.row(item))
         else:
             super().keyPressEvent(event)
+    
     def contextMenuEvent(self, event):
+        """Display context menu with delete option."""
         menu = QMenu(self)
         delete_action = menu.addAction("Delete")
         action = menu.exec_(self.mapToGlobal(event.pos()))
@@ -48,65 +54,269 @@ class CustomListWidget(QListWidget):
 
 class SaveSettingsDialog(QDialog):
     def __init__(self, parent=None):
+        """Dialog for configuring save settings (used when running the model)."""
         super().__init__(parent)
         self.setWindowTitle("Save Settings")
+        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
         layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignTop)
+        layout.setSpacing(5)
 
         label_save_path = QLabel("Save Path")
         layout.addWidget(label_save_path)
         
-        dir_layout = QHBoxLayout()
-        self.dir_edit = QLineEdit()
+        # Save path with default current directory and folder icon without overlap
+        self.dir_edit = QLineEdit(os.getcwd())
         self.dir_edit.setPlaceholderText("Select save directory")
-        browse_button = QPushButton()
-        browse_button.setIcon(qta.icon('fa.folder', color='orange'))
-        browse_button.clicked.connect(self.browse_directory)
-        dir_layout.addWidget(self.dir_edit)
-        dir_layout.addWidget(browse_button)
-        layout.addLayout(dir_layout)
+        action = self.dir_edit.addAction(qta.icon('fa.folder', color='orange'), QLineEdit.TrailingPosition)
+        action.triggered.connect(self.browse_directory)
+        self.dir_edit.setTextMargins(0, 0, 30, 0)
+        layout.addWidget(self.dir_edit)
 
         optional_label = QLabel("Optional")
         layout.addWidget(optional_label)
 
-        self.prefix_edit = QLineEdit()
+        self.prefix_edit = QLineEdit(self.settings.value("save/prefix", ""))
         self.prefix_edit.setPlaceholderText("Enter filename prefix")
         layout.addWidget(self.prefix_edit)
 
-        self.suffix_edit = QLineEdit()
+        self.suffix_edit = QLineEdit(self.settings.value("save/suffix", ""))
         self.suffix_edit.setPlaceholderText("Enter filename suffix")
         layout.addWidget(self.suffix_edit)
         
         self.csv_checkbox = QCheckBox("Extract .csv file")
-        self.csv_checkbox.setChecked(True)
+        self.csv_checkbox.setChecked(self.settings.value("save/csv_enabled", True, type=bool))
         layout.addWidget(self.csv_checkbox)
         
-        self.csv_edit = QLineEdit("detection.csv")
+        self.csv_edit = QLineEdit(self.settings.value("save/csv_filename", "detection.csv"))
         layout.addWidget(self.csv_edit)
         
         self.csv_checkbox.toggled.connect(self.toggle_csv_edit)
-        
+
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
         
     def toggle_csv_edit(self, checked):
+        """Enable or disable CSV filename edit based on checkbox."""
         self.csv_edit.setEnabled(checked)
         
     def browse_directory(self):
+        """Open a directory dialog to select a save folder."""
         folder = QFileDialog.getExistingDirectory(self, "Select Save Directory")
         if folder:
             self.dir_edit.setText(folder)
             
     def get_values(self):
+        """Return the save settings values."""
         return (self.dir_edit.text(), 
                 self.prefix_edit.text(), 
                 self.suffix_edit.text(), 
                 self.csv_checkbox.isChecked(), 
                 self.csv_edit.text())
 
+class SettingsDialog(QDialog):
+    def __init__(self, parent=None):
+        """Dialog for configuring all settings (View, Save, Advanced)."""
+        super().__init__(parent)
+        self.setWindowTitle("Settings")
+        self.resize(600, 400)
+        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
+        self.tab_widget = QTabWidget()
+        
+        self.view_tab = QWidget()
+        self.save_tab = QWidget()
+        self.advanced_tab = QWidget()
+        self.tab_widget.addTab(self.view_tab, "View Settings")
+        self.tab_widget.addTab(self.save_tab, "Save Settings")
+        self.tab_widget.addTab(self.advanced_tab, "Advanced Settings")
+        
+        # --- View Settings Tab ---
+        view_layout = QVBoxLayout(self.view_tab)
+        view_layout.setAlignment(Qt.AlignTop)
+        view_layout.setSpacing(5)
+        
+        # Create Label Settings group
+        label_group = QGroupBox("Label Settings")
+        label_layout = QVBoxLayout(label_group)
+        label_layout.setSpacing(5)
+        self.cb_show_leaf_label = QCheckBox("Show Leaf Area Label")
+        self.cb_show_spot_label = QCheckBox("Show Spot Area Label")
+        self.cb_show_count = QCheckBox("Show Count")
+        self.cb_show_percent = QCheckBox("Show Percentage")
+        self.cb_show_leaf_label.setChecked(self.settings.value("view/show_leaf", True, type=bool))
+        self.cb_show_spot_label.setChecked(self.settings.value("view/show_spot", True, type=bool))
+        self.cb_show_count.setChecked(self.settings.value("view/show_count", True, type=bool))
+        self.cb_show_percent.setChecked(self.settings.value("view/show_percent", True, type=bool))
+        label_layout.addWidget(self.cb_show_leaf_label)
+        label_layout.addWidget(self.cb_show_spot_label)
+        label_layout.addWidget(self.cb_show_count)
+        label_layout.addWidget(self.cb_show_percent)
+        view_layout.addWidget(label_group)
+        
+        # Create Graph Settings group
+        graph_group = QGroupBox("Graph Settings")
+        graph_layout = QVBoxLayout(graph_group)
+        graph_layout.setSpacing(5)
+        self.cb_show_box = QCheckBox("Show Bounding Box")
+        self.cb_show_label = QCheckBox("Show Label")
+        self.cb_show_conf = QCheckBox("Show Confidence")
+        self.cb_show_box.setChecked(self.settings.value("view/show_box", False, type=bool))
+        self.cb_show_label.setChecked(self.settings.value("view/show_label", False, type=bool))
+        self.cb_show_conf.setChecked(self.settings.value("view/show_conf", False, type=bool))
+        graph_layout.addWidget(self.cb_show_box)
+        graph_layout.addWidget(self.cb_show_label)
+        graph_layout.addWidget(self.cb_show_conf)
+        view_layout.addWidget(graph_group)
+        
+        # Connect state changes for enabling/disabling sub-items
+        self.cb_show_leaf_label.stateChanged.connect(self.update_label_settings)
+        self.cb_show_spot_label.stateChanged.connect(self.update_label_settings)
+        self.cb_show_box.stateChanged.connect(self.update_graph_settings)
+        
+        # --- Save Settings Tab ---
+        save_layout = QVBoxLayout(self.save_tab)
+        save_layout.setAlignment(Qt.AlignTop)
+        save_layout.setSpacing(5)
+        self.le_save_path = QLineEdit(self.settings.value("save/save_path", os.getcwd()))
+        save_layout.addWidget(QLabel("Save Path:"))
+        action = self.le_save_path.addAction(qta.icon('fa.folder', color='orange'), QLineEdit.TrailingPosition)
+        action.triggered.connect(self.browse_save_path)
+        self.le_save_path.setTextMargins(0, 0, 30, 0)
+        save_layout.addWidget(self.le_save_path)
+        
+        self.le_prefix = QLineEdit(self.settings.value("save/prefix", ""))
+        save_layout.addWidget(QLabel("Filename Prefix:"))
+        save_layout.addWidget(self.le_prefix)
+        
+        self.le_suffix = QLineEdit(self.settings.value("save/suffix", ""))
+        save_layout.addWidget(QLabel("Filename Suffix:"))
+        save_layout.addWidget(self.le_suffix)
+        
+        self.cb_csv = QCheckBox("Extract .csv file")
+        self.cb_csv.setChecked(self.settings.value("save/csv_enabled", True, type=bool))
+        save_layout.addWidget(self.cb_csv)
+        
+        self.le_csv_filename = QLineEdit(self.settings.value("save/csv_filename", "detection.csv"))
+        save_layout.addWidget(QLabel("CSV Filename:"))
+        save_layout.addWidget(self.le_csv_filename)
+        
+        # --- Advanced Settings Tab ---
+        advanced_layout = QVBoxLayout(self.advanced_tab)
+        advanced_layout.setAlignment(Qt.AlignTop)
+        advanced_layout.setSpacing(5)
+        self.le_leaf_threshold = QLineEdit(self.settings.value("advanced/leaf_threshold", "0.8"))
+        self.le_leaf_threshold.setMaximumWidth(50)
+        advanced_layout.addWidget(QLabel("Leaf Confidence Threshold:"))
+        advanced_layout.addWidget(self.le_leaf_threshold)
+        
+        self.le_spot_threshold = QLineEdit(self.settings.value("advanced/spot_threshold", "0.3"))
+        self.le_spot_threshold.setMaximumWidth(50)
+        advanced_layout.addWidget(QLabel("Spot Confidence Threshold:"))
+        advanced_layout.addWidget(self.le_spot_threshold)
+        
+        dialog_buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        dialog_buttons.accepted.connect(self.accept)
+        dialog_buttons.rejected.connect(self.reject)
+        
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(self.tab_widget)
+        main_layout.addWidget(dialog_buttons)
+        
+    def update_label_settings(self):
+        """If both leaf and spot labels are unchecked, disable Count and Percentage."""
+        if not (self.cb_show_leaf_label.isChecked() or self.cb_show_spot_label.isChecked()):
+            self.cb_show_count.setChecked(False)
+            self.cb_show_count.setEnabled(False)
+            self.cb_show_percent.setChecked(False)
+            self.cb_show_percent.setEnabled(False)
+        else:
+            self.cb_show_count.setEnabled(True)
+            self.cb_show_percent.setEnabled(True)
+    
+    def update_graph_settings(self):
+        """If Show Bounding Box is unchecked, disable Show Label and Show Confidence."""
+        if not self.cb_show_box.isChecked():
+            self.cb_show_label.setChecked(False)
+            self.cb_show_conf.setChecked(False)
+            self.cb_show_label.setEnabled(False)
+            self.cb_show_conf.setEnabled(False)
+        else:
+            self.cb_show_label.setEnabled(True)
+            self.cb_show_conf.setEnabled(True)
+    
+    def browse_save_path(self):
+        """Open a directory dialog to choose the save folder."""
+        folder = QFileDialog.getExistingDirectory(self, "Select Save Directory")
+        if folder:
+            self.le_save_path.setText(folder)
+            
+    def accept(self):
+        """Save all settings to QSettings and close the dialog."""
+        self.settings.setValue("view/show_leaf", self.cb_show_leaf_label.isChecked())
+        self.settings.setValue("view/show_spot", self.cb_show_spot_label.isChecked())
+        self.settings.setValue("view/show_count", self.cb_show_count.isChecked())
+        self.settings.setValue("view/show_percent", self.cb_show_percent.isChecked())
+        self.settings.setValue("view/show_box", self.cb_show_box.isChecked())
+        self.settings.setValue("view/show_label", self.cb_show_label.isChecked())
+        self.settings.setValue("view/show_conf", self.cb_show_conf.isChecked())
+        
+        self.settings.setValue("save/save_path", self.le_save_path.text())
+        self.settings.setValue("save/prefix", self.le_prefix.text())
+        self.settings.setValue("save/suffix", self.le_suffix.text())
+        self.settings.setValue("save/csv_enabled", self.cb_csv.isChecked())
+        self.settings.setValue("save/csv_filename", self.le_csv_filename.text())
+        
+        self.settings.setValue("advanced/leaf_threshold", self.le_leaf_threshold.text())
+        self.settings.setValue("advanced/spot_threshold", self.le_spot_threshold.text())
+        super().accept()
+
+class HelpDialog(QDialog):
+    def __init__(self, parent=None):
+        """Dialog displaying help information."""
+        super().__init__(parent)
+        self.setWindowTitle("Help")
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignTop)
+        layout.setSpacing(5)
+        help_label = QLabel(
+            "Instructions:\n"
+            "1. Load images using 'Open File' or 'Open Folder'.\n"
+            "2. Click 'Run' to perform detection on loaded images.\n"
+            "3. Predicted result images and .csv report would be saved after running."
+        )
+        help_label.setWordWrap(True)
+        layout.addWidget(help_label)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok)
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
+class AboutDialog(QDialog):
+    def __init__(self, parent=None):
+        """Dialog displaying about information including developers and copyright."""
+        super().__init__(parent)
+        self.setWindowTitle("About")
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignTop)
+        layout.setSpacing(5)
+        about_text = (
+            "OSU Leaf Spot Detector\n\n"
+            "Developed by:\n"
+            " - Heechan Jeong, Oregon State University\n"
+            " - Heesung Woo, Oregon State University\n\n"
+            "© 2025 Advanced Forestry Systems Lab. All rights reserved."
+        )
+        label = QLabel(about_text)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok)
+        buttons.accepted.connect(self.accept)
+        layout.addWidget(buttons)
+
 class MainWindow(QMainWindow):
     def __init__(self):
+        """Main application window initialization."""
         super().__init__()
         try:
             current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -116,6 +326,7 @@ class MainWindow(QMainWindow):
         model_dir = os.path.join(current_dir, "model")
         self.setWindowTitle("OSU Leaf Spot Detector")
         self.setWindowIcon(QIcon(os.path.join(logo_dir, "main_icon.png")))
+        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
         model_path = os.path.join(model_dir, "leafspot.pt")
         self.pred_model = YOLO(model_path)
         self.running = False
@@ -163,8 +374,8 @@ class MainWindow(QMainWindow):
         self.btn_open_folder.setFixedSize(120, 50)
         self.btn_open_folder.clicked.connect(self.open_folder)
         bottom_layout.addWidget(self.btn_open_folder)
-        self.btn_run = QPushButton("Run Model")
-        self.btn_run.setToolTip("Run Model")
+        self.btn_run = QPushButton("Run")
+        self.btn_run.setToolTip("Run")
         self.btn_run.setIcon(qta.icon('ph.play-circle-bold', color='blue'))
         self.btn_run.setIconSize(QSize(32, 32))
         self.btn_run.setFixedSize(120, 50)
@@ -185,8 +396,18 @@ class MainWindow(QMainWindow):
         self.progress_bar.setValue(0)
         main_layout.addWidget(self.progress_bar)
         self.current_image_path = None
-
+        
+        # Menubar order: Settings, Help, About
+        menubar = self.menuBar()
+        settings_action = menubar.addAction("Settings")
+        settings_action.triggered.connect(self.open_settings)
+        help_action = menubar.addAction("Help")
+        help_action.triggered.connect(self.show_help)
+        about_action = menubar.addAction("About")
+        about_action.triggered.connect(self.show_about)
+    
     def open_file(self):
+        """Open file dialog to select image files and add them to the list widget."""
         files, _ = QFileDialog.getOpenFileNames(
             self,
             "Open Images",
@@ -196,7 +417,6 @@ class MainWindow(QMainWindow):
         if files:
             for f in files:
                 exists = False
-                # 중복 체크: 파일 경로 비교
                 for i in range(self.list_widget.count()):
                     if self.list_widget.item(i).data(Qt.UserRole) == f:
                         exists = True
@@ -207,8 +427,9 @@ class MainWindow(QMainWindow):
                     item.setData(Qt.UserRole, f)
                     self.list_widget.addItem(item)
                     self.list_widget.setItemWidget(item, widget)
-
+    
     def open_folder(self):
+        """Open folder dialog, list image files in the folder, and add them to the list widget."""
         folder = QFileDialog.getExistingDirectory(self, "Select Folder")
         if folder:
             self.list_widget.clear()
@@ -221,15 +442,17 @@ class MainWindow(QMainWindow):
                 item.setData(Qt.UserRole, f)
                 self.list_widget.addItem(item)
                 self.list_widget.setItemWidget(item, widget)
-
+    
     def show_selected_image(self, item):
+        """Display the selected image in the original image label."""
         image_path = item.data(Qt.UserRole)
         self.current_image_path = image_path
         pixmap = QPixmap(image_path)
         scaled_pixmap = pixmap.scaled(self.label_original.size(), Qt.KeepAspectRatio)
         self.label_original.setPixmap(scaled_pixmap)
-
+    
     def run_model(self):
+        """Run the detection model on all images in the list and display/save results."""
         if self.list_widget.count() == 0:
             QMessageBox.warning(self, "Warning", "Please load a file or folder before running the model.")
             return
@@ -237,14 +460,23 @@ class MainWindow(QMainWindow):
         if self.running:
             self.abort = True
             return
+
         dialog = SaveSettingsDialog(self)
         if dialog.exec_() == QDialog.Rejected:
             return
-        # suffix 값도 받아옴
         self.save_dir, self.prefix, self.suffix, csv_enabled, csv_filename = dialog.get_values()
         if not self.save_dir:
             QMessageBox.warning(self, "Warning", "You must specify a save directory.")
             return
+
+        show_box = self.settings.value("view/show_box", False, type=bool)
+        show_label = self.settings.value("view/show_label", False, type=bool)
+        show_conf = self.settings.value("view/show_conf", False, type=bool)
+        show_leaf = self.settings.value("view/show_leaf", True, type=bool)
+        show_spot = self.settings.value("view/show_spot", True, type=bool)
+        show_count = self.settings.value("view/show_count", True, type=bool)
+        show_percent = self.settings.value("view/show_percent", True, type=bool)
+        
         self.running = True
         self.abort = False
         self.btn_run.setText("Abort")
@@ -252,6 +484,10 @@ class MainWindow(QMainWindow):
         total = self.list_widget.count()
         self.progress_bar.setMaximum(total)
         csv_data = []
+        leaf_threshold = float(self.settings.value("advanced/leaf_threshold", "0.8"))
+        spot_threshold = float(self.settings.value("advanced/spot_threshold", "0.3"))
+        text_color = (0, 255, 0)
+        bg_color = (0, 0, 0)
         for i in range(total):
             if self.abort:
                 break
@@ -276,7 +512,7 @@ class MainWindow(QMainWindow):
                     for j, box in enumerate(boxes):
                         cls_id = int(box.cls.cpu().numpy()[0])
                         conf_val = float(box.conf.cpu().numpy()[0])
-                        if (cls_id == 0 and conf_val >= 0.8) or (cls_id == 1 and conf_val >= 0.3):
+                        if (cls_id == 0 and conf_val >= leaf_threshold) or (cls_id == 1 and conf_val >= spot_threshold):
                             keep_indices.append(j)
                     if keep_indices:
                         result.boxes = boxes[keep_indices]
@@ -287,7 +523,7 @@ class MainWindow(QMainWindow):
                         result.masks = None
                 boxes = result.boxes
                 masks = result.masks
-                annotated_img = result.plot(boxes=False, labels=False, conf=False)
+                annotated_img = result.plot(boxes=show_box, labels=show_label, conf=show_conf)
                 h, w = annotated_img.shape[:2]
                 scale = self.imgsz / max(w, h)
                 new_width = int(w * scale)
@@ -316,19 +552,29 @@ class MainWindow(QMainWindow):
                 font_thickness = 2
                 x_position = 10
                 y_position = 30
-                for cls_id in counts:
-                    class_name = self.pred_model.names[cls_id]
-                    count = counts[cls_id]
-                    if cls_id == 0:
-                        text_line = f"{class_name} Area: {leaf_pixels} pixels"
-                    else:
-                        text_line = f"{class_name} Area: {spot_pixels} px ({round(spot_percentage,2)}%), Count: {count}"
+                if show_leaf:
+                    class_name = self.pred_model.names[0]
+                    text_line = f"{class_name} Area: {leaf_pixels} pixels"
                     (text_width, text_height), _ = cv2.getTextSize(text_line, font, font_scale, font_thickness)
                     top_left = (x_position - 5, y_position - text_height - 5)
                     bottom_right = (x_position + text_width + 5, y_position + 5)
-                    cv2.rectangle(annotated_img_resized, top_left, bottom_right, (0, 0, 0), thickness=-1)
+                    cv2.rectangle(annotated_img_resized, top_left, bottom_right, bg_color, thickness=-1)
                     cv2.putText(annotated_img_resized, text_line, (x_position, y_position),
-                                font, font_scale, (0, 255, 0), font_thickness, cv2.LINE_AA)
+                                font, font_scale, text_color, font_thickness, cv2.LINE_AA)
+                    y_position += text_height + 15
+                if show_spot:
+                    class_name = self.pred_model.names[1]
+                    text_line = f"{class_name} Area: {spot_pixels} px"
+                    if show_percent:
+                        text_line += f" ({round(spot_percentage,2)}%)"
+                    if show_count:
+                        text_line += f", Count: {spot_number}"
+                    (text_width, text_height), _ = cv2.getTextSize(text_line, font, font_scale, font_thickness)
+                    top_left = (x_position - 5, y_position - text_height - 5)
+                    bottom_right = (x_position + text_width + 5, y_position + 5)
+                    cv2.rectangle(annotated_img_resized, top_left, bottom_right, bg_color, thickness=-1)
+                    cv2.putText(annotated_img_resized, text_line, (x_position, y_position),
+                                font, font_scale, text_color, font_thickness, cv2.LINE_AA)
                     y_position += text_height + 15
                 orig_filename = os.path.basename(image_path)
                 name, ext = os.path.splitext(orig_filename)
@@ -364,11 +610,27 @@ class MainWindow(QMainWindow):
                 writer.writerows(csv_data)
         self.running = False
         self.abort = False
-        self.btn_run.setText("Run Model")
+        self.btn_run.setText("Run")
         self.btn_run.setIcon(qta.icon('fa.play', color='blue'))
         QMessageBox.information(self, "Completed", "All tasks are completed.")
-
+    
+    def show_help(self):
+        """Open the help dialog."""
+        dialog = HelpDialog(self)
+        dialog.exec_()
+    
+    def show_about(self):
+        """Open the about dialog."""
+        dialog = AboutDialog(self)
+        dialog.exec_()
+    
+    def open_settings(self):
+        """Open the settings dialog to adjust view, save, and advanced options."""
+        dialog = SettingsDialog(self)
+        dialog.exec_()
+    
     def closeEvent(self, event):
+        """Confirm exit when closing the main window."""
         reply = QMessageBox.question(self, "Exit", "Do you want to exit OSU Leaf Spot Detector?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
             if self.running:
@@ -378,9 +640,9 @@ class MainWindow(QMainWindow):
             event.ignore()
 
 def main():
+    """Application entry point."""
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-    
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

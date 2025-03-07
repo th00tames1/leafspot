@@ -27,7 +27,7 @@ If using Anaconda 3, create a clean environment and activate it.
 In Anaconda Prompt, type the following these steps to install the project:
 ```bash
 # Create Conda Environment
-conda create -n YOUR_ENVIRONMENT_NAME python=3.8
+conda create -n YOUR_ENVIRONMENT_NAME python==3.10
 
 # Activate Conda Environment
 conda activate YOUR_ENVIRONMENT_NAME
@@ -47,7 +47,7 @@ pip install -r requirements.txt
 
 ## How To Use
 
-
+It's easy to run!
 ```bash
 python run.py
 ```
