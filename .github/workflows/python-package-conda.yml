@@ -1,0 +1,32 @@
+name: Multi-OS Python Package Testing
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Miniconda with Python 3.10
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: 3.10
+          activate-environment: test-env
+
+      - name: Install dependencies
+        run: |
+          conda run -n test-env pip install --upgrade pip
+          conda run -n test-env pip install -r requirements.txt
+
+      - name: Run application
+        run: conda run -n test-env python run.py
