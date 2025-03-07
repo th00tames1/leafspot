@@ -12,8 +12,7 @@
 
 ## Introduction
 
-Welcome to **OSU Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.  
-You can directly edit this section to update the project description as your work evolves.
+Welcome to **OSU Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.
 
 ## Key Features
 
