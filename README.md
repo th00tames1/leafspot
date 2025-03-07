@@ -27,7 +27,7 @@ If using Anaconda 3, create a clean environment and activate it.
 In Anaconda Prompt, type the following these steps to install the project:
 ```bash
 # Create Conda Environment
-conda create -n YOUR_ENVIRONMENT_NAME python==3.9
+conda create -n YOUR_ENVIRONMENT_NAME python=3.8
 
 # Activate Conda Environment
 conda activate YOUR_ENVIRONMENT_NAME
