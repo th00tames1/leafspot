@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import qtawesome as qta
 import csv
+import multiprocessing
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QListWidget,
@@ -13,7 +14,7 @@ from PyQt5.QtWidgets import (
     QTabWidget, QGroupBox
 )
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtCore import Qt, QSize, QSettings
+from PyQt5.QtCore import Qt, QSize, QSettings, QStandardPaths
 
 from ultralytics import YOLO
 
@@ -57,7 +58,7 @@ class SaveSettingsDialog(QDialog):
         """Dialog for configuring save settings (used when running the model)."""
         super().__init__(parent)
         self.setWindowTitle("Save Settings")
-        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
+        self.settings = QSettings("OSU", "OSULeafSpotDetector")
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignTop)
         layout.setSpacing(5)
@@ -65,8 +66,9 @@ class SaveSettingsDialog(QDialog):
         label_save_path = QLabel("Save Path")
         layout.addWidget(label_save_path)
         
-        # Save path with default current directory and folder icon without overlap
-        self.dir_edit = QLineEdit(os.getcwd())
+        default_save_path = QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
+        saved_path = self.settings.value("save/save_path", default_save_path)
+        self.dir_edit = QLineEdit(saved_path)
         self.dir_edit.setPlaceholderText("Select save directory")
         action = self.dir_edit.addAction(qta.icon('fa.folder', color='orange'), QLineEdit.TrailingPosition)
         action.triggered.connect(self.browse_directory)
@@ -122,7 +124,7 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Settings")
         self.resize(600, 400)
-        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
+        self.settings = QSettings("OSU", "OSULeafSpotDetector")
         self.tab_widget = QTabWidget()
         
         self.view_tab = QWidget()
@@ -179,7 +181,8 @@ class SettingsDialog(QDialog):
         save_layout = QVBoxLayout(self.save_tab)
         save_layout.setAlignment(Qt.AlignTop)
         save_layout.setSpacing(5)
-        self.le_save_path = QLineEdit(self.settings.value("save/save_path", os.getcwd()))
+        default_save_path = QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation)
+        self.le_save_path = QLineEdit(self.settings.value("save/save_path", default_save_path))
         save_layout.addWidget(QLabel("Save Path:"))
         action = self.le_save_path.addAction(qta.icon('fa.folder', color='orange'), QLineEdit.TrailingPosition)
         action.triggered.connect(self.browse_save_path)
@@ -318,15 +321,16 @@ class MainWindow(QMainWindow):
     def __init__(self):
         """Main application window initialization."""
         super().__init__()
-        try:
+        if getattr(sys, 'frozen', False):
+            current_dir = os.path.dirname(sys.executable) + "\\_internal"
+        else:
             current_dir = os.path.dirname(os.path.abspath(__file__))
-        except NameError:
-            current_dir = os.getcwd()
+            
         logo_dir = os.path.join(current_dir, "logo")
         model_dir = os.path.join(current_dir, "model")
         self.setWindowTitle("OSU Leaf Spot Detector")
         self.setWindowIcon(QIcon(os.path.join(logo_dir, "main_icon.png")))
-        self.settings = QSettings("YourCompany", "OSULeafSpotDetector")
+        self.settings = QSettings("OSU", "OSULeafSpotDetector")
         model_path = os.path.join(model_dir, "leafspot.pt")
         self.pred_model = YOLO(model_path)
         self.running = False
@@ -649,4 +653,5 @@ def main():
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
+    multiprocessing.freeze_support()
     main()
