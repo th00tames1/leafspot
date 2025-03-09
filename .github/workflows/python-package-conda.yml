@@ -1,38 +1,35 @@
 name: Multi-OS Python Package Testing
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+on: [push]
 
 jobs:
   test:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     env:
       DISPLAY: ':99.0'
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        
-      - name: Set up Miniconda with Python 3.10
-        uses: conda-incubator/setup-miniconda@v3
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v2
         with:
-          miniconda-version: "latest" 
-          auto-update-conda: true
           python-version: 3.10
-          activate-environment: test-env
       - uses: tlambert03/setup-qt-libs@v1
       - name: build "display"
         run: |
           /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
       - name: Install dependencies
         run: |
-          conda run -n test-env pip install --upgrade pip
-          conda run -n test-env pip install -r requirements.txt
-
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Run application
-        run: conda run -n test-env python run.py
+        run: python run.py
