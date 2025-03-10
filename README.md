@@ -1,3 +1,4 @@
+![SW icon](logo/main_icon.png "icon")
 # Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
