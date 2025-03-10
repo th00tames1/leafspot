@@ -44,11 +44,12 @@ It's easy to run!
 ```bash
 python run.py
 ```
-GUI software will appear soon.  
-It may take up to about one minute on the first run.
+GUI software will appear soon. It may take up to about one minute on the first run.
+
+![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png "GitHub Logo")
 
 1. Open Images by click 'Open File' or 'Open Folder'.  
-The example file is located in the test_images folder.
+The example images are located in the **'test_images folder'**. Or, you can download by use this google drive link: https://drive.google.com/drive/folders/10MSsa04RvnxVbzmnlWHY5Ggod6un33EV?usp=sharing
 
 2. Click 'Run'.
 
