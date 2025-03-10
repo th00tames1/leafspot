@@ -10,6 +10,7 @@ jobs:
     env:
       DISPLAY: ':99.0'
     steps:
+    - uses: tlambert03/setup-qt-libs@v1
     - uses: actions/checkout@v4
     - name: Set up Python 3.10
       uses: actions/setup-python@v3
@@ -23,8 +24,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
-    - name: Install qtlibs
-    - uses: tlambert03/setup-qt-libs@v1
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
