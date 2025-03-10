@@ -4,13 +4,14 @@
 
 ## Introduction
 
-Welcome to **OSU Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.
+Welcome to **Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.
 
 ## Key Features
 
-- **Feature 1:** [Describe feature one]
-- **Feature 2:** [Describe feature two]
-- **Feature 3:** [Describe feature three]
+- **User-Friendly Interface:** Provides an intuitive GUI for loading images or folders, and for viewing both original and prediction result images side by side.
+- **Advanced YOLO-Based Detection:** Utilizes a YOLO model to accurately detect leaf and spot areas with adjustable thresholds for optimal performance.
+- **Comprehensive Reporting & Customization:** Automatically annotates images, generates detailed CSV reports.
+- **Batch Processing Capability:** Enables running detection on multiple images at once.
 
 ## Installation
 
@@ -44,10 +45,10 @@ It's easy to run! It may take up to about one minute on the first run.
 python run.py
 ```
 
-1. Open Images by click 'Open File' or 'Open Folder. 
+1. Open Images by click 'Open File' or 'Open Folder'. 
 The example file is located in the test_images folder.
 
-2. Click 'Run' and set the save path.
+2. Click 'Run'.
 
 3. The prediction result images and .csv reports will be saved.
 
