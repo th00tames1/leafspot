@@ -55,6 +55,6 @@ The example file is located in the test_images folder.
 
 ## License
 
-Copyright Heechan Jeong, 2025.
+Copyright Heechan Jeong (Advanced Forestry Systems Lab, OSU), 2025.
 
 Distributed under the terms of the MIT license, Leaf Spot Detector is free and open source software.
