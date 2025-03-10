@@ -1,6 +1,9 @@
 # Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Docs](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://example.com/mydocs)
+[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-failing-red.svg)](https://example.com/unit-tests)
+
 
 ## Introduction
 
@@ -15,7 +18,7 @@ Welcome to **Leaf Spot Detector**! This project is designed to detect the necrot
 
 ## Installation
 
-If using Anaconda 3, create a clean environment and activate it. \n
+If using Anaconda 3, create a clean environment and activate it.
 In Anaconda Prompt, type the following these steps to install the project:
 ```bash
 # Create Conda Environment
