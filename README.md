@@ -15,7 +15,7 @@ Welcome to **Leaf Spot Detector**! This project is designed to detect the necrot
 
 ## Installation
 
-If using Anaconda 3, create a clean environment and activate it. 
+If using Anaconda 3, create a clean environment and activate it. \n
 In Anaconda Prompt, type the following these steps to install the project:
 ```bash
 # Create Conda Environment
@@ -24,7 +24,7 @@ conda create -n YOUR_ENVIRONMENT_NAME python==3.10
 # Activate Conda Environment
 conda activate YOUR_ENVIRONMENT_NAME
 
-# Install the PyPI & git
+# Install the PyPI & git (if there's an error)
 conda install pip
 conda install git
 
