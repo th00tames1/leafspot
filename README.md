@@ -1,5 +1,6 @@
-![SW icon](logo/main_icon.png "icon")
-# Leaf Spot Detector
+<img src="logo/main_icon.png" alt="icon" title="icon" width="50%" />
+
+## Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Multi OS Test](https://github.com/th00tames1/leafspot/actions/workflows/MultiOS%20Test.yml/badge.svg)](https://github.com/th00tames1/leafspot/actions/workflows/MultiOS%20Test.yml)
