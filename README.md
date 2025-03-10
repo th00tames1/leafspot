@@ -1,4 +1,4 @@
-<img src="logo/main_icon.png" alt="icon" title="icon" width="50%" />
+<img src="logo/main_icon.png" alt="icon" title="icon" width="200px" length="200px" />
 
 ## Leaf Spot Detector
 
