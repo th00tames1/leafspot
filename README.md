@@ -46,7 +46,7 @@ python run.py
 ```
 GUI software will appear soon. It may take up to about one minute on the first run.
 
-![GitHub Logo](https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png "GitHub Logo")
+![SW Thumbnail](https://drive.google.com/file/d/1X8p1Y_GJ_JD9_oO2hjZHC4-hv0Qda_3l/view "Thumbnail")
 
 1. Open Images by click 'Open File' or 'Open Folder'.  
 The example images are located in the **'test_images folder'**. Or, you can download by use this google drive link: https://drive.google.com/drive/folders/10MSsa04RvnxVbzmnlWHY5Ggod6un33EV?usp=sharing
