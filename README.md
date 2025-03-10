@@ -1,9 +1,6 @@
 # Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Docs](https://img.shields.io/badge/docs-passing-brightgreen.svg)](https://example.com/mydocs)
-[![Unit Tests](https://img.shields.io/badge/Unit%20Tests-failing-red.svg)](https://example.com/unit-tests)
-
 
 ## Introduction
 
