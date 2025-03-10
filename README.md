@@ -1,9 +1,7 @@
 # Leaf Spot Detector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python Package using Ubuntu](https://github.com/th00tames1/leafspot/actions/workflows/ubuntu_test.yml/badge.svg)](https://github.com/th00tames1/leafspot/actions/workflows/ubuntu_test.yml)
-[![Python Package using MacOS and Windows](https://github.com/th00tames1/leafspot/actions/workflows/macos_windows%20test.yml/badge.svg)](https://github.com/th00tames1/leafspot/actions/workflows/macos_windows%20test.yml)
-
+[![Multi OS Test](https://github.com/th00tames1/leafspot/actions/workflows/MultiOS%20Test.yml/badge.svg)](https://github.com/th00tames1/leafspot/actions/workflows/MultiOS%20Test.yml)
 ## Introduction
 
 Welcome to **Leaf Spot Detector**! This project is designed to detect the necrotic area on the leaf.
