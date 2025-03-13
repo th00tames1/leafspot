@@ -27,7 +27,7 @@ conda create -n YOUR_ENVIRONMENT_NAME python==3.10
 # Activate Conda Environment
 conda activate YOUR_ENVIRONMENT_NAME
 
-# Install the PyPI & git (if there's an error)
+# Install the PyPI & git (if there's an error about package dependencies)
 conda install pip
 conda install git
 
